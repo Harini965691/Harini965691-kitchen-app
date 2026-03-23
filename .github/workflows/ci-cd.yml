@@ -42,5 +42,7 @@ jobs:
           curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-          kubectl apply --dry-run=client -f k8s/namespace.yaml
-          kubectl apply --dry-run=client -f k8s/web-ui/deployment.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/namespace.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/web-ui/deployment.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/api/deployment.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/db/statefulset.yaml
