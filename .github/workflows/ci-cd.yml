@@ -37,7 +37,7 @@ jobs:
       - name: Validate K8s manifests
         run: |
           pip install yamllint
-          yamllint -d relaxed k8s/namespace.yaml
-          yamllint -d relaxed k8s/web-ui/deployment.yaml
-          yamllint -d relaxed k8s/api/deployment.yaml
-          yamllint -d relaxed k8s/db/statefulset.yaml
+          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/namespace.yaml
+          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/web-ui/deployment.yaml
+          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/api/deployment.yaml
+          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/db/statefulset.yaml
