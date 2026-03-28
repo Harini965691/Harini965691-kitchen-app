@@ -1,4 +1,4 @@
-name: Kitchen App CI/CD
+﻿name: Kitchen App CI/CD
 on:
   push:
     branches: [ master, main ]
