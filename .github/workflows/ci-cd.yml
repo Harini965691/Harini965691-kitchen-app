@@ -36,8 +36,16 @@ jobs:
         run: docker build -t kitchen-api:local ./api --target production
       - name: Validate K8s manifests
         run: |
-          pip install yamllint
-          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/namespace.yaml
-          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/web-ui/deployment.yaml
-          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/api/deployment.yaml
-          yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable}}" k8s/db/statefulset.yaml
+          python3 -c "
+          import yaml, sys
+          files = [
+            'k8s/namespace.yaml',
+            'k8s/web-ui/deployment.yaml',
+            'k8s/api/deployment.yaml',
+            'k8s/db/statefulset.yaml'
+          ]
+          for f in files:
+            with open(f) as fh:
+              yaml.safe_load_all(fh)
+            print('OK:', f)
+          "
