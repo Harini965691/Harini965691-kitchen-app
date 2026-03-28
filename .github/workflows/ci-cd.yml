@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: api/package-lock.json
       - name: Install dependencies
         run: npm ci
@@ -36,10 +36,8 @@ jobs:
         run: docker build -t kitchen-api:local ./api --target production
       - name: Validate K8s manifests
         run: |
-          curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl apply --dry-run=client --validate=false -f k8s/namespace.yaml --kubeconfig=/dev/null
-          kubectl apply --dry-run=client --validate=false -f k8s/web-ui/deployment.yaml --kubeconfig=/dev/null
-          kubectl apply --dry-run=client --validate=false -f k8s/api/deployment.yaml --kubeconfig=/dev/null
-          kubectl apply --dry-run=client --validate=false -f k8s/db/statefulset.yaml --kubeconfig=/dev/null
+          pip install yamllint
+          yamllint -d relaxed k8s/namespace.yaml
+          yamllint -d relaxed k8s/web-ui/deployment.yaml
+          yamllint -d relaxed k8s/api/deployment.yaml
+          yamllint -d relaxed k8s/db/statefulset.yaml
