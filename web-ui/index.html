@@ -1,10 +1,473 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Kitchen App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Manager Pro</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f1117;
+      --surface: #161b27;
+      --card:    #1c2333;
+      --border:  #2a3448;
+      --border2: #323d52;
+      --text:    #e6edf3;
+      --muted:   #7d8fa5;
+      --accent:  #4f8ef7;
+      --accent2: #6366f1;
+      --green:   #23c55e;
+      --yellow:  #f59e0b;
+      --blue:    #3b82f6;
+      --gray:    #64748b;
+      --red:     #f43f5e;
+      --radius:  14px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ── TOPBAR ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .brand-name { font-size: 16px; font-weight: 700; }
+    .brand-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .header-nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      padding: 7px 14px; border-radius: 8px;
+      color: var(--muted); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: all 0.15s;
+    }
+    .nav-link:hover  { background: var(--card); color: var(--text); }
+    .nav-link.active { background: rgba(79,142,247,0.15); color: var(--accent); }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .status-pill {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 99px; padding: 6px 13px; font-size: 12px;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 9px;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--muted); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--border2); }
+
+    /* ── PAGE ── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 28px 32px; }
+
+    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .page-sub   { font-size: 13px; color: var(--muted); margin-bottom: 26px; }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 26px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px;
+      position: relative; overflow: hidden;
+    }
+    .stat-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .stat-card.s-pending::after   { background: var(--yellow); }
+    .stat-card.s-preparing::after { background: var(--blue); }
+    .stat-card.s-ready::after     { background: var(--green); }
+    .stat-card.s-served::after    { background: var(--gray); }
+
+    .stat-icon { font-size: 22px; margin-bottom: 14px; display: block; }
+    .stat-num  { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 5px; }
+    .stat-lbl  { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+    .stat-card.s-pending .stat-num   { color: var(--yellow); }
+    .stat-card.s-preparing .stat-num { color: var(--blue); }
+    .stat-card.s-ready .stat-num     { color: var(--green); }
+    .stat-card.s-served .stat-num    { color: var(--gray); }
+
+    /* ── MAIN GRID ── */
+    .main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .panel + .panel { margin-top: 18px; }
+    .panel-head {
+      padding: 15px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-head h2 { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .panel-body { padding: 20px; }
+
+    /* ── FORM ── */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 13px;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 9px; color: var(--text);
+      font-size: 14px; font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+    }
+    .field select option { background: var(--surface); color: var(--text); }
+    .field textarea { resize: vertical; min-height: 68px; }
+
+    .btn-primary {
+      width: 100%; padding: 11px 16px; border-radius: 9px; border: none;
+      background: linear-gradient(135deg, #4f8ef7, #6366f1);
+      color: white; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .btn-primary:hover   { opacity: 0.88; }
+    .btn-primary:active  { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .feedback {
+      margin-top: 11px; font-size: 13px;
+      padding: 9px 13px; border-radius: 8px; display: none;
+    }
+    .feedback.ok  { display: block; background: rgba(35,197,94,0.1); color: #4ade80; border: 1px solid rgba(35,197,94,0.2); }
+    .feedback.err { display: block; background: rgba(244,63,94,0.1); color: #fb7185; border: 1px solid rgba(244,63,94,0.2); }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 10px 16px; text-align: left;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255,255,255,0.015); }
+
+    .dish-name { font-weight: 600; font-size: 14px; }
+    .dish-cat  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .badge.pending   { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+    .badge.preparing { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+    .badge.ready     { background: rgba(35,197,94,0.12);  color: #4ade80; border: 1px solid rgba(35,197,94,0.2); }
+    .badge.served    { background: rgba(100,116,139,0.12);color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+
+    .time-cell { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .id-cell   { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .empty-state { padding: 50px 20px; text-align: center; color: var(--muted); }
+    .empty-state .e-icon { font-size: 42px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-state p { font-size: 13px; }
+
+    .btn-sm {
+      padding: 5px 13px; border-radius: 7px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border2); background: var(--surface);
+      color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .btn-sm:hover { color: var(--text); border-color: var(--accent); }
+
+    .link-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .link-row:first-child { padding-top: 0; }
+    .link-row:last-child  { border-bottom: none; padding-bottom: 0; }
+    .link-row a { color: var(--accent); font-size: 13px; text-decoration: none; font-weight: 500; }
+    .link-row a:hover { text-decoration: underline; }
+    .link-tag {
+      font-size: 10px; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 2px 7px; border-radius: 5px; font-family: ui-monospace, monospace;
+    }
+
+    @media (max-width: 900px) {
+      .header-nav { display: none; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .main-grid  { grid-template-columns: 1fr; }
+      .page { padding: 20px 16px; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Kitchen App Running</h1>
-  <p>Frontend container working</p>
+
+<!-- TOPBAR -->
+<header>
+  <div class="header-left">
+    <div class="logo">🍽️</div>
+    <div>
+      <div class="brand-name">Kitchen Manager</div>
+      <div class="brand-sub">Order Management System</div>
+    </div>
+  </div>
+
+  <nav class="header-nav">
+    <a class="nav-link active" href="#">📊 Dashboard</a>
+    <a class="nav-link" href="/api/metrics" target="_blank">📈 Metrics</a>
+    <a class="nav-link" href="/api/health"  target="_blank">🩺 Health</a>
+    <a class="nav-link" href="/api/orders"  target="_blank">📦 Orders API</a>
+  </nav>
+
+  <div class="header-right">
+    <div class="status-pill">
+      <span class="dot"></span>
+      <span id="apiStatus" style="color:var(--muted)">Connecting…</span>
+    </div>
+    <button class="icon-btn" id="refreshBtn" title="Refresh">↻</button>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub" id="lastUpdated">Loading…</div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card s-pending">
+      <span class="stat-icon">⏳</span>
+      <div class="stat-num" id="cnt-pending">0</div>
+      <div class="stat-lbl">Pending</div>
+    </div>
+    <div class="stat-card s-preparing">
+      <span class="stat-icon">👨‍🍳</span>
+      <div class="stat-num" id="cnt-preparing">0</div>
+      <div class="stat-lbl">Preparing</div>
+    </div>
+    <div class="stat-card s-ready">
+      <span class="stat-icon">✅</span>
+      <div class="stat-num" id="cnt-ready">0</div>
+      <div class="stat-lbl">Ready to Serve</div>
+    </div>
+    <div class="stat-card s-served">
+      <span class="stat-icon">🍽️</span>
+      <div class="stat-num" id="cnt-served">0</div>
+      <div class="stat-lbl">Served</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Form + Links -->
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>🛎️ Place New Order</h2>
+        </div>
+        <div class="panel-body">
+          <div class="field">
+            <label>Dish Name</label>
+            <input type="text" id="dish" placeholder="e.g. Masala Dosa, Biryani…" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="category">
+              <option value="">— Select category —</option>
+              <option>🥗 Starter</option>
+              <option>🍛 Main Course</option>
+              <option>🍮 Dessert</option>
+              <option>🥤 Beverage</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Special Note</label>
+            <textarea id="note" placeholder="Allergies, spice level, extras…"></textarea>
+          </div>
+          <button class="btn-primary" id="createBtn">Place Order →</button>
+          <div class="feedback" id="createMsg"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>🔗 Quick Access</h2></div>
+        <div class="panel-body" style="padding:14px 20px">
+          <div class="link-row">
+            <a href="/api/health"  target="_blank">API Health Check</a>
+            <span class="link-tag">GET</span>
+          </div>
+          <div class="link-row">
+            <a href="/api/metrics" target="_blank">Prometheus Metrics</a>
+            <span class="link-tag">GET</span>
+          </div>
+          <div class="link-row">
+            <a href="/api/orders"  target="_blank">Raw Orders JSON</a>
+            <span class="link-tag">GET</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Orders Table -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>🧾 Live Orders <span id="totalCount" style="color:var(--muted);font-weight:400;font-size:12px;margin-left:4px"></span></h2>
+        <button class="btn-sm" id="refreshBtn2">↻ Refresh</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dish</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Order ID</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="4">
+              <div class="empty-state"><div class="e-icon">⏳</div><p>Loading orders…</p></div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const apiBase = '/api';
+  const el = id => document.getElementById(id);
+
+  function fmt(v) {
+    try {
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    } catch { return '—'; }
+  }
+
+  function badge(s) {
+    const m = { pending:['⏳','Pending'], preparing:['👨‍🍳','Preparing'], ready:['✅','Ready'], served:['🍽️','Served'] };
+    const [icon, label] = m[s] || ['•', s];
+    return `<span class="badge ${s}">${icon} ${label}</span>`;
+  }
+
+  async function apiGet(path) {
+    const r = await fetch(apiBase + path, { headers: { Accept: 'application/json' } });
+    return { r, data: await r.json().catch(() => null) };
+  }
+
+  async function refreshHealth() {
+    const s = el('apiStatus');
+    try {
+      const { r, data } = await apiGet('/health');
+      s.textContent = r.ok ? `Online · DB ${data?.db || '?'}` : `Error ${r.status}`;
+      s.style.color  = r.ok ? 'var(--green)' : 'var(--red)';
+    } catch { s.textContent = 'Offline'; s.style.color = 'var(--red)'; }
+  }
+
+  async function refreshOrders() {
+    const body = el('ordersBody');
+    try {
+      const { r, data } = await apiGet('/orders');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const orders = Array.isArray(data) ? data : [];
+
+      el('totalCount').textContent  = `(${orders.length} order${orders.length !== 1 ? 's' : ''})`;
+      el('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+      const counts = { pending:0, preparing:0, ready:0, served:0 };
+      orders.forEach(o => { if (o?.status in counts) counts[o.status]++; });
+      Object.entries(counts).forEach(([k,v]) => el(`cnt-${k}`).textContent = v);
+
+      if (!orders.length) {
+        body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="e-icon">🍽️</div><p>No orders yet — place your first one!</p></div></td></tr>`;
+        return;
+      }
+
+      body.innerHTML = orders.slice().reverse().map(o => {
+        const id  = o?._id?.toString ? o._id.toString() : (o?._id || '');
+        const cat = o?.category ? `<div class="dish-cat">${o.category}</div>` : '';
+        return `<tr>
+          <td><div class="dish-name">${o?.dish || '—'}</div>${cat}</td>
+          <td>${badge(o?.status || 'pending')}</td>
+          <td><span class="time-cell">${fmt(o?.createdAt)}</span></td>
+          <td><div class="id-cell" title="${id}">${id}</div></td>
+        </tr>`;
+      }).join('');
+    } catch(e) {
+      body.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="color:var(--red)">⚠️ ${e.message}</div></td></tr>`;
+    }
+  }
+
+  async function createOrder() {
+    const msg = el('createMsg');
+    msg.className = 'feedback';
+    const dish     = el('dish').value.trim();
+    const category = el('category').value;
+    const note     = el('note').value.trim();
+    if (!dish) { msg.className = 'feedback err'; msg.textContent = '⚠️ Please enter a dish name.'; return; }
+    el('createBtn').disabled = true;
+    try {
+      const r = await fetch(apiBase + '/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dish, category, note })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+      msg.className = 'feedback ok';
+      msg.textContent = `✅ Order placed: ${data.dish}`;
+      el('dish').value = ''; el('category').value = ''; el('note').value = '';
+      await refreshOrders(); await refreshHealth();
+    } catch(e) {
+      msg.className = 'feedback err';
+      msg.textContent = `❌ ${e.message}`;
+    } finally { el('createBtn').disabled = false; }
+  }
+
+  el('createBtn').addEventListener('click', createOrder);
+  el('refreshBtn').addEventListener('click', refreshOrders);
+  el('refreshBtn2').addEventListener('click', refreshOrders);
+  el('dish').addEventListener('keydown', e => { if (e.key === 'Enter') createOrder(); });
+
+  refreshHealth(); refreshOrders();
+  setInterval(refreshHealth, 8000);
+  setInterval(refreshOrders, 5000);
+</script>
 </body>
 </html>
